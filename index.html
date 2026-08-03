@@ -84,15 +84,19 @@
         </div>
     </section>
 
-    <!-- Gallery Section -->
+    <!-- Gallery Section (Dynamic Google Drive Sync) -->
     <section id="gallery" class="gallery-section">
         <div class="container">
             <h2 class="section-title">Project Gallery</h2>
             <p class="section-subtitle">A showcase of our recent installations and craftwork.</p>
 
-            <div class="gallery-grid" id="gallery-grid">
-                <!-- JavaScript automatically loads images here -->
+            <!-- Loading Indicator -->
+            <div id="gallery-loading" class="gallery-loading">
+                Loading latest project photos...
             </div>
+
+            <!-- Photos populate dynamically via script.js -->
+            <div class="gallery-grid hidden" id="gallery-grid"></div>
         </div>
     </section>
 
@@ -116,6 +120,7 @@
         </div>
     </footer>
 
+    <!-- Main JavaScript File -->
     <script src="script.js"></script>
 </body>
 </html>

@@ -1,30 +1,69 @@
 // =========================================================
-// HOW JOHANN CAN ADD / REMOVE PHOTOS EASILY:
-// 1. Create a folder named "images" inside your project folder.
-// 2. Put your photo files inside it (e.g. kitchen1.jpg, bar1.jpg).
-// 3. Add the filename to the array below (inside quotes with commas).
+// GOOGLE DRIVE GALLERY CONFIGURATION
+// Web App Script URL generated from Google Apps Script
 // =========================================================
+const DRIVE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDStIhhmSLHBv5tdS5CuQS9yu2hCckJCVjO5jdgjFWTxsHBurl4CgH0LW25GVZ1qYJXg/exec';
 
-const photoList = [
-    // Example: "images/kitchen1.jpg",
-    // Example: "images/cupboard1.jpg",
+// Local photos backup (if ever needed without Google Drive)
+const localPhotoList = [
+    // "images/kitchen1.jpg",
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
-    const galleryGrid = document.getElementById("gallery-grid");
+    loadGallery();
+});
 
-    if (photoList.length === 0) {
-        galleryGrid.innerHTML = `
-            <div class="no-photos-msg">
-                <h3>📷 Gallery Coming Soon</h3>
-                <p>We are currently updating our portfolio with our newest projects in Randburg. Check back shortly!</p>
-            </div>
-        `;
-    } else {
-        galleryGrid.innerHTML = photoList.map(src => `
+async function loadGallery() {
+    const galleryGrid = document.getElementById("gallery-grid");
+    const galleryLoading = document.getElementById("gallery-loading");
+
+    try {
+        // Fetch real-time photos from Johann's Google Drive folder
+        const response = await fetch(DRIVE_SCRIPT_URL);
+        const images = await response.json();
+
+        // Hide loading text and un-hide the gallery container
+        if (galleryLoading) galleryLoading.classList.add("hidden");
+        if (galleryGrid) galleryGrid.classList.remove("hidden");
+
+        // Case 1: Folder is completely empty
+        if (!images || images.length === 0) {
+            renderEmptyState(galleryGrid);
+            return;
+        }
+
+        // Case 2: Render photos dynamically from Google Drive
+        galleryGrid.innerHTML = images.map(img => `
             <div class="gallery-item">
-                <img src="${src}" alt="Jancol Cut & Edge Installation" loading="lazy">
+                <img src="${img.url}" alt="${img.name || 'Jancol Cut & Edge Installation'}" loading="lazy">
             </div>
         `).join("");
+
+    } catch (error) {
+        console.error("Error fetching Google Drive gallery:", error);
+
+        // Fallback: If Drive fetch fails, check for any local images or show empty state
+        if (galleryLoading) galleryLoading.classList.add("hidden");
+        if (galleryGrid) galleryGrid.classList.remove("hidden");
+
+        if (localPhotoList.length > 0) {
+            galleryGrid.innerHTML = localPhotoList.map(src => `
+                <div class="gallery-item">
+                    <img src="${src}" alt="Jancol Cut & Edge Installation" loading="lazy">
+                </div>
+            `).join("");
+        } else {
+            renderEmptyState(galleryGrid);
+        }
     }
-});
+}
+
+// Render empty state message when no photos are available
+function renderEmptyState(container) {
+    container.innerHTML = `
+        <div class="no-photos-msg">
+            <h3>📷 Gallery Coming Soon</h3>
+            <p>We are currently updating our portfolio with our newest projects in Randburg. Check back shortly!</p>
+        </div>
+    `;
+}
